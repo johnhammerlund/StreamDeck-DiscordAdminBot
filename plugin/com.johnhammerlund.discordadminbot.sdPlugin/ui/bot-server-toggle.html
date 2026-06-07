@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <title>Bot Server Settings</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #1e2124; color: #dcddde; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; font-size: 12px; padding: 10px; }
+    .field { display: flex; align-items: center; margin-bottom: 8px; gap: 8px; }
+    label { min-width: 90px; color: #72767d; text-align: right; flex-shrink: 0; }
+    input { flex: 1; background: #2f3136; border: 1px solid #202225; border-radius: 4px; color: #dcddde; padding: 5px 8px; font-size: 12px; }
+    input:focus { outline: none; border-color: #5865f2; }
+    .note { color: #72767d; font-size: 10px; margin-top: 4px; padding: 0 0 0 98px; line-height: 1.4; }
+    .status { margin-top: 12px; padding: 6px 8px; border-radius: 4px; background: #2f3136; color: #72767d; font-size: 11px; }
+  </style>
+</head>
+<body>
+  <div class="field">
+    <label>Bot Token</label>
+    <input type="password" id="token" placeholder="Discord bot token" autocomplete="off"/>
+  </div>
+  <div class="note">From discord.com/developers → Applications → Bot → Token</div>
+
+  <div class="field" style="margin-top:10px;">
+    <label>WS Port</label>
+    <input type="number" id="port" placeholder="57821" min="1024" max="65535"/>
+  </div>
+  <div class="note">Must match across all actions. Default: 57821.</div>
+
+  <div class="field" style="margin-top:10px;">
+    <label>Bot Path</label>
+    <input type="text" id="botServerPath" placeholder="(bundled default)"/>
+  </div>
+  <div class="note">Leave blank to use the bundled bot-server.js</div>
+
+  <div class="status" id="statusMsg">Bot server status: unknown</div>
+
+  <script>
+  let ws = null, ctx = null, settings = {};
+
+  function connectElgato(lang, port, pluginUUID, registerEvent, info, actionInfo) {
+    const ai = JSON.parse(actionInfo);
+    ctx = ai.context;
+    settings = ai.payload.settings || {};
+    updateUI();
+
+    ws = new WebSocket("ws://127.0.0.1:" + port);
+    ws.onopen = function() {
+      ws.send(JSON.stringify({ event: registerEvent, uuid: pluginUUID }));
+    };
+    ws.onmessage = function(evt) {
+      const data = JSON.parse(evt.data);
+      if (data.event === "didReceiveSettings") {
+        settings = data.payload.settings || {};
+        updateUI();
+      }
+      if (data.event === "sendToPropertyInspector") {
+        if (data.payload && data.payload.status) {
+          document.getElementById("statusMsg").textContent = "Bot server status: " + data.payload.status;
+        }
+      }
+    };
+  }
+
+  function updateUI() {
+    document.getElementById("token").value = settings.token || "";
+    document.getElementById("port").value = settings.port || 57821;
+    document.getElementById("botServerPath").value = settings.botServerPath || "";
+  }
+
+  function save() {
+    settings.token = document.getElementById("token").value;
+    settings.port = parseInt(document.getElementById("port").value) || 57821;
+    const p = document.getElementById("botServerPath").value.trim();
+    settings.botServerPath = p || undefined;
+    if (ws && ws.readyState === WebSocket.OPEN) {
+      ws.send(JSON.stringify({ event: "setSettings", context: ctx, payload: settings }));
+    }
+  }
+
+  ["token", "port", "botServerPath"].forEach(function(id) {
+    var el = document.getElementById(id);
+    el.addEventListener("change", save);
+    el.addEventListener("input", save);
+  });
+  </script>
+</body>
+</html>

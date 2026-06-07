@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <title>Voice Channel User Settings</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #1e2124; color: #dcddde; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; font-size: 12px; padding: 10px; }
+    .field { display: flex; align-items: center; margin-bottom: 8px; gap: 8px; }
+    label { min-width: 90px; color: #72767d; text-align: right; flex-shrink: 0; }
+    input, select { flex: 1; background: #2f3136; border: 1px solid #202225; border-radius: 4px; color: #dcddde; padding: 5px 8px; font-size: 12px; }
+    input:focus, select:focus { outline: none; border-color: #5865f2; }
+    .note { color: #72767d; font-size: 10px; margin-top: 2px; padding: 0 0 6px 98px; line-height: 1.4; }
+    .hint { color: #72767d; font-size: 10px; margin-top: 10px; line-height: 1.5; border-top: 1px solid #2f3136; padding-top: 8px; }
+  </style>
+</head>
+<body>
+  <div class="field">
+    <label>Guild ID</label>
+    <input type="text" id="guildId" placeholder="e.g. 123456789012345678"/>
+  </div>
+  <div class="note">Right-click server icon → Copy Server ID</div>
+
+  <div class="field">
+    <label>Channel ID</label>
+    <input type="text" id="channelId" placeholder="e.g. 123456789012345678"/>
+  </div>
+  <div class="note">Right-click the voice channel → Copy Channel ID</div>
+
+  <div class="field">
+    <label>Slot</label>
+    <select id="slot">
+      <option value="1">Slot 1 (1st user to join)</option>
+      <option value="2">Slot 2</option>
+      <option value="3">Slot 3</option>
+      <option value="4">Slot 4</option>
+      <option value="5">Slot 5</option>
+      <option value="6">Slot 6</option>
+      <option value="7">Slot 7</option>
+      <option value="8">Slot 8</option>
+    </select>
+  </div>
+
+  <div class="hint">
+    Each encoder dial shows one member slot from the voice channel.<br>
+    Bots are excluded. Members are ordered by join time.<br><br>
+    <strong>Dial press</strong> — server mute / unmute<br>
+    <strong>Touch</strong> — server deafen / undeafen<br>
+    <strong>Long touch</strong> — disconnect from voice<br>
+    <strong>Dial rotate</strong> — reserved (future volume control)
+  </div>
+
+  <script>
+  let ws = null, ctx = null, settings = {};
+
+  function connectElgato(lang, port, pluginUUID, registerEvent, info, actionInfo) {
+    const ai = JSON.parse(actionInfo);
+    ctx = ai.context;
+    settings = ai.payload.settings || {};
+    updateUI();
+
+    ws = new WebSocket("ws://127.0.0.1:" + port);
+    ws.onopen = function() {
+      ws.send(JSON.stringify({ event: registerEvent, uuid: pluginUUID }));
+    };
+    ws.onmessage = function(evt) {
+      const data = JSON.parse(evt.data);
+      if (data.event === "didReceiveSettings") { settings = data.payload.settings || {}; updateUI(); }
+    };
+  }
+
+  function updateUI() {
+    document.getElementById("guildId").value = settings.guildId || "";
+    document.getElementById("channelId").value = settings.channelId || "";
+    document.getElementById("slot").value = settings.slot || 1;
+  }
+
+  function save() {
+    settings.guildId = document.getElementById("guildId").value.trim();
+    settings.channelId = document.getElementById("channelId").value.trim();
+    settings.slot = parseInt(document.getElementById("slot").value) || 1;
+    if (ws && ws.readyState === WebSocket.OPEN) {
+      ws.send(JSON.stringify({ event: "setSettings", context: ctx, payload: settings }));
+    }
+  }
+
+  ["guildId","channelId","slot"].forEach(function(id) {
+    var el = document.getElementById(id);
+    el.addEventListener("change", save);
+    el.addEventListener("input", save);
+  });
+  </script>
+</body>
+</html>

@@ -1,0 +1,13 @@
+{
+  "name": "streamdeck-discordadminbot",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Stream Deck plugin + Discord bot for voice channel admin controls",
+  "scripts": {
+    "build": "npm run build --prefix plugin",
+    "watch": "npm run watch --prefix plugin",
+    "bot:build": "npm run build --prefix bot",
+    "bot:start": "npm run start --prefix bot",
+    "install:all": "npm install --prefix plugin && npm install --prefix bot"
+  }
+}

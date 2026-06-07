@@ -1,0 +1,89 @@
+{
+  "Author": "John Hammerlund",
+  "CodePath": "bin/plugin.js",
+  "Description": "Control Discord voice channel users from your Stream Deck: mute, deafen, disconnect, and monitor voice channel activity.",
+  "Icon": "imgs/plugin-icon",
+  "Name": "Discord Admin Bot",
+  "UUID": "com.johnhammerlund.discordadminbot",
+  "SDKVersion": 2,
+  "Version": "1.0.0.0",
+  "Category": "Discord",
+  "CategoryIcon": "imgs/plugin-icon",
+  "Nodejs": {
+    "Version": "24"
+  },
+  "Software": {
+    "MinimumVersion": "7.1"
+  },
+  "OS": [
+    { "Platform": "mac", "MinimumVersion": "14" },
+    { "Platform": "windows", "MinimumVersion": "10" }
+  ],
+  "Actions": [
+    {
+      "Name": "Bot Server",
+      "UUID": "com.johnhammerlund.discordadminbot.bot-server",
+      "Icon": "imgs/actions/bot-toggle",
+      "Tooltip": "Start or stop the local Discord bot server",
+      "PropertyInspectorPath": "ui/bot-server-toggle.html",
+      "Controllers": ["Keypad"],
+      "States": [
+        { "Name": "Stopped", "Image": "imgs/states/bot-stopped", "Title": "Bot Off" },
+        { "Name": "Running", "Image": "imgs/states/bot-running", "Title": "Bot On" }
+      ]
+    },
+    {
+      "Name": "Mute User",
+      "UUID": "com.johnhammerlund.discordadminbot.mute-user",
+      "Icon": "imgs/actions/mute-user",
+      "Tooltip": "Toggle server mute for a Discord user",
+      "PropertyInspectorPath": "ui/mute-user.html",
+      "Controllers": ["Keypad"],
+      "States": [
+        { "Name": "Unmuted", "Image": "imgs/states/unmuted", "Title": "" },
+        { "Name": "Muted", "Image": "imgs/states/muted", "Title": "" }
+      ]
+    },
+    {
+      "Name": "Deafen User",
+      "UUID": "com.johnhammerlund.discordadminbot.deafen-user",
+      "Icon": "imgs/actions/deafen-user",
+      "Tooltip": "Toggle server deafen for a Discord user",
+      "PropertyInspectorPath": "ui/deafen-user.html",
+      "Controllers": ["Keypad"],
+      "States": [
+        { "Name": "Hearing", "Image": "imgs/states/hearing", "Title": "" },
+        { "Name": "Deafened", "Image": "imgs/states/deafened", "Title": "" }
+      ]
+    },
+    {
+      "Name": "Disconnect User",
+      "UUID": "com.johnhammerlund.discordadminbot.hangup-user",
+      "Icon": "imgs/actions/hangup",
+      "Tooltip": "Disconnect a user from their current voice channel",
+      "PropertyInspectorPath": "ui/hangup-user.html",
+      "Controllers": ["Keypad"],
+      "States": [
+        { "Name": "Disconnected", "Image": "imgs/states/disconnected", "Title": "" },
+        { "Name": "Connected", "Image": "imgs/states/connected", "Title": "" }
+      ]
+    },
+    {
+      "Name": "Voice Channel User",
+      "UUID": "com.johnhammerlund.discordadminbot.user-volume",
+      "Icon": "imgs/actions/volume",
+      "Tooltip": "Shows a voice channel user on the SD+ touch strip. Press = mute, touch = deafen, long-touch = disconnect.",
+      "PropertyInspectorPath": "ui/user-volume.html",
+      "Controllers": ["Encoder"],
+      "Encoder": {
+        "layout": "$A1",
+        "TriggerDescription": {
+          "Rotate": "Reserved (future volume via Discord RPC)",
+          "Push": "Toggle server mute",
+          "Touch": "Toggle server deafen",
+          "LongTouch": "Disconnect from voice"
+        }
+      }
+    }
+  ]
+}

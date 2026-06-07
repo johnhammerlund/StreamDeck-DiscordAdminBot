@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <title>Mute User Settings</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #1e2124; color: #dcddde; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; font-size: 12px; padding: 10px; }
+    .field { display: flex; align-items: center; margin-bottom: 8px; gap: 8px; }
+    label { min-width: 80px; color: #72767d; text-align: right; flex-shrink: 0; }
+    input { flex: 1; background: #2f3136; border: 1px solid #202225; border-radius: 4px; color: #dcddde; padding: 5px 8px; font-size: 12px; }
+    input:focus { outline: none; border-color: #5865f2; }
+    .note { color: #72767d; font-size: 10px; margin-top: 2px; padding: 0 0 6px 88px; line-height: 1.4; }
+  </style>
+</head>
+<body>
+  <div class="field">
+    <label>Guild ID</label>
+    <input type="text" id="guildId" placeholder="e.g. 123456789012345678"/>
+  </div>
+  <div class="note">Right-click your server icon → Copy Server ID (Developer Mode required)</div>
+
+  <div class="field">
+    <label>User ID</label>
+    <input type="text" id="userId" placeholder="e.g. 987654321098765432"/>
+  </div>
+  <div class="note">Right-click a user → Copy User ID</div>
+
+  <div class="field">
+    <label>Label</label>
+    <input type="text" id="label" placeholder="(auto: display name)"/>
+  </div>
+
+  <script>
+  let ws = null, ctx = null, settings = {};
+
+  function connectElgato(lang, port, pluginUUID, registerEvent, info, actionInfo) {
+    const ai = JSON.parse(actionInfo);
+    ctx = ai.context;
+    settings = ai.payload.settings || {};
+    updateUI();
+
+    ws = new WebSocket("ws://127.0.0.1:" + port);
+    ws.onopen = function() {
+      ws.send(JSON.stringify({ event: registerEvent, uuid: pluginUUID }));
+    };
+    ws.onmessage = function(evt) {
+      const data = JSON.parse(evt.data);
+      if (data.event === "didReceiveSettings") { settings = data.payload.settings || {}; updateUI(); }
+    };
+  }
+
+  function updateUI() {
+    document.getElementById("guildId").value = settings.guildId || "";
+    document.getElementById("userId").value = settings.userId || "";
+    document.getElementById("label").value = settings.label || "";
+  }
+
+  function save() {
+    settings.guildId = document.getElementById("guildId").value.trim();
+    settings.userId = document.getElementById("userId").value.trim();
+    settings.label = document.getElementById("label").value.trim() || undefined;
+    if (ws && ws.readyState === WebSocket.OPEN) {
+      ws.send(JSON.stringify({ event: "setSettings", context: ctx, payload: settings }));
+    }
+  }
+
+  ["guildId","userId","label"].forEach(function(id) {
+    var el = document.getElementById(id);
+    el.addEventListener("change", save);
+    el.addEventListener("input", save);
+  });
+  </script>
+</body>
+</html>
