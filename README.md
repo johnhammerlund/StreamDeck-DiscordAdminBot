@@ -1,5 +1,7 @@
 # Discord Admin Bot — Stream Deck Plugin
 
+> **Fair warning:** The majority of this code was vibe-coded with an AI assistant and has not been reviewed with high scrutiny. It works for my use case and it's a low-stakes side project, so I haven't put in the time for a proper audit. Use at your own discretion, especially before handing it a live bot token.
+
 Physical admin controls for a Discord voice channel, powered by a local bot server and your Stream Deck.
 
 ## Actions
