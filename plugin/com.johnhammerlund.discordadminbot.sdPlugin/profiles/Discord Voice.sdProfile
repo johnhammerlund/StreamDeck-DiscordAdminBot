@@ -1,0 +1,9 @@
+{
+  "DeviceType": 7,
+  "Name": "Discord Voice",
+  "Pages": {
+    "0": {
+      "Actions": {}
+    }
+  }
+}

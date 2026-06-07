@@ -36,7 +36,7 @@
   <div class="status" id="statusMsg">Bot server status: unknown</div>
 
   <script>
-  let ws = null, ctx = null, settings = {};
+  let ws = null, ctx = null, settings = {}, dirty = false;
 
   function connectElgato(lang, port, pluginUUID, registerEvent, info, actionInfo) {
     const ai = JSON.parse(actionInfo);
@@ -47,10 +47,11 @@
     ws = new WebSocket("ws://127.0.0.1:" + port);
     ws.onopen = function() {
       ws.send(JSON.stringify({ event: registerEvent, uuid: pluginUUID }));
+      if (dirty) save();
     };
     ws.onmessage = function(evt) {
       const data = JSON.parse(evt.data);
-      if (data.event === "didReceiveSettings") {
+      if (data.event === "didReceiveSettings" && !dirty) {
         settings = data.payload.settings || {};
         updateUI();
       }
@@ -69,6 +70,7 @@
   }
 
   function save() {
+    dirty = true;
     settings.token = document.getElementById("token").value;
     settings.port = parseInt(document.getElementById("port").value) || 57821;
     const p = document.getElementById("botServerPath").value.trim();

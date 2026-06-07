@@ -7,7 +7,7 @@
   "UUID": "com.johnhammerlund.discordadminbot",
   "SDKVersion": 2,
   "Version": "1.0.0.0",
-  "Category": "Discord",
+  "Category": "Discord Admin Bot",
   "CategoryIcon": "imgs/plugin-icon",
   "Nodejs": {
     "Version": "24"
@@ -18,6 +18,14 @@
   "OS": [
     { "Platform": "mac", "MinimumVersion": "14" },
     { "Platform": "windows", "MinimumVersion": "10" }
+  ],
+  "Profiles": [
+    {
+      "Name": "Discord Voice",
+      "DeviceType": 7,
+      "DontAutoSwitchWhenInstalled": true,
+      "Readonly": false
+    }
   ],
   "Actions": [
     {
@@ -76,7 +84,7 @@
       "PropertyInspectorPath": "ui/user-volume.html",
       "Controllers": ["Encoder"],
       "Encoder": {
-        "layout": "$A1",
+        "layout": "$B1",
         "TriggerDescription": {
           "Rotate": "Reserved (future volume via Discord RPC)",
           "Push": "Toggle server mute",
@@ -84,6 +92,17 @@
           "LongTouch": "Disconnect from voice"
         }
       }
+    },
+    {
+      "Name": "Switch Profile",
+      "UUID": "com.johnhammerlund.discordadminbot.switch-profile",
+      "Icon": "imgs/actions/switch-profile",
+      "Tooltip": "Switch to a bundled profile (e.g. the Discord Voice encoder layout)",
+      "PropertyInspectorPath": "ui/switch-profile.html",
+      "Controllers": ["Keypad"],
+      "States": [
+        { "Name": "Default", "Image": "imgs/actions/switch-profile", "Title": "" }
+      ]
     }
   ]
 }
