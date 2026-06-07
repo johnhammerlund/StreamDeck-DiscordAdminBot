@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 72 72" width="72" height="72">
+  <!-- Red background circle (same base as other bot states) -->
+  <circle cx="36" cy="36" r="28" fill="#ef4444"/>
+  <!-- Bot antenna + arc (same shape as running/stopped, white) -->
+  <line x1="36" y1="14" x2="36" y2="36" stroke="white" stroke-width="5" stroke-linecap="round"/>
+  <path d="M21 21 A20 20 0 1 0 51 21" fill="none" stroke="white" stroke-width="5" stroke-linecap="round"/>
+  <!-- X badge in bottom-right -->
+  <circle cx="54" cy="54" r="12" fill="#7f1d1d"/>
+  <line x1="48" y1="48" x2="60" y2="60" stroke="white" stroke-width="3" stroke-linecap="round"/>
+  <line x1="60" y1="48" x2="48" y2="60" stroke="white" stroke-width="3" stroke-linecap="round"/>
+</svg>

@@ -37,7 +37,8 @@
       "Controllers": ["Keypad"],
       "States": [
         { "Name": "Stopped", "Image": "imgs/states/bot-stopped", "Title": "Bot Off" },
-        { "Name": "Running", "Image": "imgs/states/bot-running", "Title": "Bot On" }
+        { "Name": "Running", "Image": "imgs/states/bot-running", "Title": "Bot On" },
+        { "Name": "Failed", "Image": "imgs/states/bot-failed", "Title": "Bot Error" }
       ]
     },
     {

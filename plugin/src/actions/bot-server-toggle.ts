@@ -1,5 +1,6 @@
 import { action, KeyAction, KeyDownEvent, SingletonAction, WillAppearEvent, WillDisappearEvent } from "@elgato/streamdeck";
 import { spawn, ChildProcess } from "child_process";
+import fs from "fs";
 import path from "path";
 import { botClient } from "../bot-client";
 
@@ -12,6 +13,7 @@ interface BotServerSettings {
 
 const STATE_STOPPED = 0;
 const STATE_RUNNING = 1;
+const STATE_FAILED = 2;
 
 // bin/plugin.js lives in the same directory as bin/bot-server.js
 const PLUGIN_BIN_DIR = path.dirname(path.resolve(process.argv[1] ?? "plugin.js"));
@@ -67,6 +69,7 @@ export class BotServerToggle extends SingletonAction<BotServerSettings> {
   private async startBot(action: KeyAction, settings: BotServerSettings): Promise<void> {
     const token = settings.token;
     if (!token) {
+      await action.setState(STATE_FAILED);
       await action.setTitle("No token!");
       return;
     }
@@ -76,6 +79,18 @@ export class BotServerToggle extends SingletonAction<BotServerSettings> {
 
     const serverPath = settings.botServerPath || path.join(PLUGIN_BIN_DIR, "bot-server.js");
 
+    console.log(`[bot-server] node: ${process.execPath}`);
+    console.log(`[bot-server] script: ${serverPath}`);
+    console.log(`[bot-server] exists: ${fs.existsSync(serverPath)}`);
+    console.log(`[bot-server] WS_PORT: ${port}`);
+
+    if (!fs.existsSync(serverPath)) {
+      console.error(`[bot-server] bot-server.js not found at: ${serverPath}`);
+      await action.setState(STATE_FAILED);
+      await action.setTitle("Bot Error");
+      return;
+    }
+
     const child = spawn(process.execPath, [serverPath], {
       env: { ...process.env, DISCORD_TOKEN: token, WS_PORT: String(port) },
       stdio: "pipe",
@@ -83,21 +98,28 @@ export class BotServerToggle extends SingletonAction<BotServerSettings> {
     });
 
     this.botProcess = child;
-    child.stdout?.on("data", (d: Buffer) => process.stdout.write(d));
-    child.stderr?.on("data", (d: Buffer) => process.stderr.write(d));
 
-    child.on("error", async (err: Error) => {
-      console.error("[bot-server-toggle] Failed to start bot:", err.message);
+    child.stdout?.on("data", (d: Buffer) => process.stdout.write(`[bot] ${d}`));
+    child.stderr?.on("data", (d: Buffer) => process.stderr.write(`[bot] ${d}`));
+
+    child.on("error", async (err: NodeJS.ErrnoException) => {
+      console.error(`[bot-server] spawn error: ${err.message}`);
+      console.error(`[bot-server] code: ${err.code}, syscall: ${err.syscall}`);
       this.botProcess = null;
-      await action.setState(STATE_STOPPED);
-      await action.setTitle("Start failed");
+      await action.setState(STATE_FAILED);
+      await action.setTitle("Bot Error");
     });
 
-    child.on("exit", (code: number | null) => {
-      console.log(`[bot-server-toggle] Bot exited with code ${code}`);
+    child.on("exit", async (code: number | null, signal: string | null) => {
+      console.log(`[bot-server] exited — code: ${code}, signal: ${signal}`);
       this.botProcess = null;
-      action.setState(STATE_STOPPED);
-      action.setTitle("Bot Off");
+      if (code !== 0 && code !== null) {
+        await action.setState(STATE_FAILED);
+        await action.setTitle("Bot Error");
+      } else {
+        await action.setState(STATE_STOPPED);
+        await action.setTitle("Bot Off");
+      }
     });
 
     botClient.setPort(port);
