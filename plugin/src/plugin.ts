@@ -15,8 +15,17 @@ streamDeck.actions.registerAction(new HangupUser());
 streamDeck.actions.registerAction(new UserVolume());
 streamDeck.actions.registerAction(new SwitchProfile());
 
-botClient.on("connected", () => streamDeck.logger.info("[bot-client] Connected to bot server"));
-botClient.on("disconnected", () => streamDeck.logger.info("[bot-client] Disconnected from bot server"));
+let botWasConnected = false;
+botClient.on("connected", () => {
+  botWasConnected = true;
+  streamDeck.logger.info("[bot-client] Connected to bot server");
+});
+botClient.on("disconnected", () => {
+  if (botWasConnected) {
+    botWasConnected = false;
+    streamDeck.logger.info("[bot-client] Disconnected from bot server");
+  }
+});
 
 initGlobalSettings();
 streamDeck.connect();

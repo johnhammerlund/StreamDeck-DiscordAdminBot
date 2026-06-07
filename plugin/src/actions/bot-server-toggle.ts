@@ -69,6 +69,7 @@ export class BotServerToggle extends SingletonAction<BotServerSettings> {
   private async startBot(action: KeyAction, settings: BotServerSettings): Promise<void> {
     const token = settings.token;
     if (!token) {
+      console.error("[bot-server] No token in settings — enter the Bot Token in this action's property inspector");
       await action.setState(STATE_FAILED);
       await action.setTitle("No token!");
       return;
