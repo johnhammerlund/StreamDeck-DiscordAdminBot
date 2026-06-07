@@ -5,11 +5,16 @@
     "0": {
       "Actions": {
         "0,0": {
+          "UUID": "com.johnhammerlund.discordadminbot.switch-profile",
+          "Settings": { "back": true },
+          "State": 0
+        },
+        "1,0": {
           "UUID": "com.johnhammerlund.discordadminbot.mute-user",
           "Settings": { "userId": "", "label": "Mute Me" },
           "State": 0
         },
-        "1,0": {
+        "2,0": {
           "UUID": "com.johnhammerlund.discordadminbot.deafen-user",
           "Settings": { "userId": "", "label": "Deafen Me" },
           "State": 0
