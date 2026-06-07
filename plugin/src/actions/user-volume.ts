@@ -9,11 +9,11 @@ import {
   WillDisappearEvent,
 } from "@elgato/streamdeck";
 import { botClient } from "../bot-client";
+import { globalSettings } from "../global-settings";
 import type { BotEvent, VoiceMember } from "../types";
 
 interface UserVolumeSettings {
   [key: string]: string | number | boolean | null;
-  guildId: string;
   channelId: string;
   slot: number; // 1-based
 }
@@ -32,8 +32,8 @@ export class UserVolume extends SingletonAction<UserVolumeSettings> {
       if (evt.event !== "memberList") return;
       for (const [, inst] of this.instances) {
         if (inst.settings.channelId === evt.channelId) {
-          const slot = (inst.settings.slot || 1) - 1;
-          inst.currentMember = evt.members[slot] ?? null;
+          const slotIndex = (Number(inst.settings.slot) || 1) - 1;
+          inst.currentMember = evt.members[slotIndex] ?? null;
           this.updateFeedback(inst.action, inst.currentMember);
         }
       }
@@ -66,7 +66,8 @@ export class UserVolume extends SingletonAction<UserVolumeSettings> {
 
   override async onWillAppear(ev: WillAppearEvent<UserVolumeSettings>): Promise<void> {
     if (!ev.action.isDial()) return;
-    const { guildId, channelId, slot } = ev.payload.settings;
+    const { channelId, slot } = ev.payload.settings;
+    const guildId = globalSettings.guildId;
 
     const inst = { action: ev.action, settings: ev.payload.settings, currentMember: null as VoiceMember | null };
     this.instances.set(ev.action.id, inst);
@@ -74,14 +75,15 @@ export class UserVolume extends SingletonAction<UserVolumeSettings> {
     if (guildId && channelId) {
       botClient.send({ op: "subscribe", guildId, channelId });
       const cached = botClient.channelMemberCache.get(channelId);
-      if (cached) inst.currentMember = cached[(slot || 1) - 1] ?? null;
+      if (cached) inst.currentMember = cached[(Number(slot) || 1) - 1] ?? null;
     }
 
     this.updateFeedback(ev.action, inst.currentMember);
   }
 
   override async onWillDisappear(ev: WillDisappearEvent<UserVolumeSettings>): Promise<void> {
-    const { guildId, channelId } = ev.payload.settings;
+    const { channelId } = ev.payload.settings;
+    const guildId = globalSettings.guildId;
     this.instances.delete(ev.action.id);
     if (guildId && channelId) {
       const stillWatched = [...this.instances.values()].some((i) => i.settings.channelId === channelId);
@@ -91,29 +93,27 @@ export class UserVolume extends SingletonAction<UserVolumeSettings> {
 
   override async onDialDown(ev: DialDownEvent<UserVolumeSettings>): Promise<void> {
     const inst = this.instances.get(ev.action.id);
-    if (!inst?.currentMember || !ev.payload.settings.guildId) return;
+    const guildId = globalSettings.guildId;
+    if (!inst?.currentMember || !guildId) return;
     const { userId, muted } = inst.currentMember;
-    botClient.send({ op: "mute", guildId: ev.payload.settings.guildId, userId, mute: !muted });
+    botClient.send({ op: "mute", guildId, userId, mute: !muted });
   }
 
   override async onTouchTap(ev: TouchTapEvent<UserVolumeSettings>): Promise<void> {
     const inst = this.instances.get(ev.action.id);
-    if (!inst?.currentMember || !ev.payload.settings.guildId) return;
-    const guildId = ev.payload.settings.guildId;
+    const guildId = globalSettings.guildId;
+    if (!inst?.currentMember || !guildId) return;
     const { userId, deafened } = inst.currentMember;
 
     if (ev.payload.hold) {
-      // Long touch: disconnect the user from voice
       botClient.send({ op: "disconnect", guildId, userId });
     } else {
-      // Short touch: toggle server deafen
       botClient.send({ op: "deafen", guildId, userId, deafen: !deafened });
     }
   }
 
   override async onDialRotate(_ev: DialRotateEvent<UserVolumeSettings>): Promise<void> {
     // Reserved: per-user volume requires Discord RPC (local IPC to the Discord client).
-    // See: https://discord.com/developers/docs/topics/rpc
   }
 
   private updateFeedback(encoder: DialAction, member: VoiceMember | null): void {

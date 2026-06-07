@@ -1,10 +1,10 @@
 import { action, KeyAction, KeyDownEvent, SingletonAction, WillAppearEvent, WillDisappearEvent } from "@elgato/streamdeck";
 import { botClient } from "../bot-client";
+import { globalSettings } from "../global-settings";
 import type { BotEvent } from "../types";
 
 interface HangupUserSettings {
   [key: string]: string | number | boolean | null;
-  guildId: string;
   userId: string;
   label: string;
 }
@@ -49,7 +49,8 @@ export class HangupUser extends SingletonAction<HangupUserSettings> {
   }
 
   override async onKeyDown(ev: KeyDownEvent<HangupUserSettings>): Promise<void> {
-    const { guildId, userId } = ev.payload.settings;
+    const guildId = globalSettings.guildId;
+    const { userId } = ev.payload.settings;
     if (!guildId || !userId) {
       await ev.action.setTitle("Configure");
       return;

@@ -6,6 +6,7 @@ import { MuteUser } from "./actions/mute-user";
 import { SwitchProfile } from "./actions/switch-profile";
 import { UserVolume } from "./actions/user-volume";
 import { botClient } from "./bot-client";
+import { initGlobalSettings } from "./global-settings";
 
 streamDeck.actions.registerAction(new BotServerToggle());
 streamDeck.actions.registerAction(new MuteUser());
@@ -17,4 +18,5 @@ streamDeck.actions.registerAction(new SwitchProfile());
 botClient.on("connected", () => streamDeck.logger.info("[bot-client] Connected to bot server"));
 botClient.on("disconnected", () => streamDeck.logger.info("[bot-client] Disconnected from bot server"));
 
+initGlobalSettings();
 streamDeck.connect();

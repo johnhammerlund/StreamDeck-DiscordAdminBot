@@ -44,7 +44,7 @@ export class BotServerToggle extends SingletonAction<BotServerSettings> {
     if (!ev.action.isKey()) return;
     this.instances.set(ev.action.id, ev.action);
 
-    const port = ev.payload.settings.port || 57821;
+    const port = Number(ev.payload.settings.port) || 57821;
     botClient.setPort(port);
     botClient.connect();
 
@@ -71,7 +71,7 @@ export class BotServerToggle extends SingletonAction<BotServerSettings> {
       return;
     }
 
-    const port = settings.port || 57821;
+    const port = Number(settings.port) || 57821;
     await action.setTitle("Starting…");
 
     const serverPath = settings.botServerPath || path.join(PLUGIN_BIN_DIR, "bot-server.js");

@@ -3,7 +3,38 @@
   "Name": "Discord Voice",
   "Pages": {
     "0": {
-      "Actions": {}
+      "Actions": {
+        "0,0": {
+          "UUID": "com.johnhammerlund.discordadminbot.mute-user",
+          "Settings": { "userId": "", "label": "Mute Me" },
+          "State": 0
+        },
+        "1,0": {
+          "UUID": "com.johnhammerlund.discordadminbot.deafen-user",
+          "Settings": { "userId": "", "label": "Deafen Me" },
+          "State": 0
+        },
+        "0,2": {
+          "UUID": "com.johnhammerlund.discordadminbot.user-volume",
+          "Settings": { "channelId": "", "slot": 1 },
+          "State": 0
+        },
+        "1,2": {
+          "UUID": "com.johnhammerlund.discordadminbot.user-volume",
+          "Settings": { "channelId": "", "slot": 2 },
+          "State": 0
+        },
+        "2,2": {
+          "UUID": "com.johnhammerlund.discordadminbot.user-volume",
+          "Settings": { "channelId": "", "slot": 3 },
+          "State": 0
+        },
+        "3,2": {
+          "UUID": "com.johnhammerlund.discordadminbot.user-volume",
+          "Settings": { "channelId": "", "slot": 4 },
+          "State": 0
+        }
+      }
     }
   }
 }
